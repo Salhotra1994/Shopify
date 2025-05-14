@@ -1,0 +1,72 @@
+(function () {
+  const badgeId = 'variant-badge-overlay';
+  let lastVariant = '';
+
+  function createBadge() {
+    const badge = document.createElement('div');
+    badge.id = badgeId;
+    badge.style.position = 'absolute';
+    badge.style.top = '10px';
+    badge.style.left = '10px';
+    badge.style.padding = '6px 12px';
+    badge.style.backgroundColor = '#000';
+    badge.style.color = '#fff';
+    badge.style.borderRadius = '5px';
+    badge.style.fontSize = '14px';
+    badge.style.fontWeight = 'bold';
+    badge.style.zIndex = '9999';
+    badge.style.opacity = '0';
+    badge.style.transition = 'opacity 0.3s ease';
+    return badge;
+  }
+
+  function updateBadge(text) {
+    const badge = document.getElementById(badgeId);
+    if (badge) {
+      badge.textContent = text;
+      badge.style.opacity = '1';
+    }
+  }
+
+  function getMainImageContainer() {
+    const mainImage = document.querySelector('[data-media-id]');
+    return mainImage?.closest('div') || null;
+  }
+
+  function getSelectedVariantTitle() {
+    const selectedLabel = document.querySelector('.product-form__input input[type="radio"]:checked + label');
+    return selectedLabel?.textContent?.trim() || null;
+  }
+
+  function initBadge(retry = 0) {
+    const container = getMainImageContainer();
+    if (!container) {
+      if (retry < 10) {
+        setTimeout(() => initBadge(retry + 1), 1000);
+      }
+      return;
+    }
+
+    if (!document.getElementById(badgeId)) {
+      const badge = createBadge();
+      container.style.position = 'relative';
+      container.appendChild(badge);
+    }
+
+    const current = getSelectedVariantTitle();
+    if (current) {
+      updateBadge(current);
+      lastVariant = current;
+    }
+
+    setInterval(() => {
+      const current = getSelectedVariantTitle();
+      if (current && current !== lastVariant) {
+        updateBadge(current);
+        lastVariant = current;
+      }
+    }, 500);
+  }
+
+  initBadge();
+})();
